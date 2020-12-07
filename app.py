@@ -1,38 +1,12 @@
 # -*- coding: utf-8 -*-
 import flask
 import json
-import mwoauth
-import os
-import random
 import re
 import requests
-import string
 from stdnum import isbn as isbn_tool
-import toolforge
-import yaml
 
 
 app = flask.Flask(__name__)
-
-user_agent = toolforge.set_user_agent(
-    'booktool',
-    email='alicia.fagerving@wikimedia.se')
-
-__dir__ = os.path.dirname(__file__)
-try:
-    with open(os.path.join(__dir__, 'config.yaml')) as config_file:
-        app.config.update(yaml.safe_load(config_file))
-except FileNotFoundError:
-    print('config.yaml file not found, assuming local development setup')
-    characters = string.ascii_letters + string.digits
-    random_string = ''.join(random.choice(characters) for _ in range(64))
-    app.secret_key = random_string
-
-if 'oauth' in app.config:
-    oauth_config = app.config['oauth']
-    consumer_token = mwoauth.ConsumerToken(oauth_config['consumer_key'],
-                                           oauth_config['consumer_secret'])
-    index_php = 'https://www.wikidata.org/w/index.php'
 
 
 @app.route('/')
