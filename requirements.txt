@@ -1,6 +1,4 @@
 flask
-mwapi
-mwoauth
-pyyaml
-requests_oauthlib
+requests
 toolforge
+stdnum
