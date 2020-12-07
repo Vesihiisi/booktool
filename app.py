@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import decorator
 import flask
 import json
 import re
@@ -7,6 +8,14 @@ from stdnum import isbn as isbn_tool
 
 
 app = flask.Flask(__name__)
+
+
+@decorator.decorator
+def enableCORS(func, *args, **kwargs):
+    rv = func(*args, **kwargs)
+    response = flask.make_response(rv)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 
 @app.route('/')
@@ -164,6 +173,7 @@ class LibrisObject:
 
 
 @app.route('/api/<libris_id>')
+@enableCORS
 def api(libris_id):
     libris_object = LibrisObject(libris_id)
     return flask.jsonify(
