@@ -28,6 +28,10 @@ class LibrisObject:
     LIBRIS_API = {"libris_editions": "https://libris.kb.se/resource/bib/{}",
                   "libris_xl": "https://libris.kb.se/{}/data.jsonld"}
 
+    HUB_API = "https://hub.toolforge.org/{}:{}?format=json"
+
+    PROPERTIES = {"libris_uri": "P5587"}
+
     def __init__(self, libris_id):
         self.libris_id = libris_id
         self.data = self.retrieve_libris_data()
@@ -96,6 +100,24 @@ class LibrisObject:
     def extract_uri(self):
         return self.data["@id"].split("/")[-1]
 
+    def wikidatafy_contributors(self, contributors_dict):
+        for contributor in contributors_dict:
+            person = contributor["person"]
+            if "https://libris.kb.se/" in person:
+                person_uri = person.split("#")[0].split("/")[-1]
+                qid = self.get_q_from_hub(
+                    self.PROPERTIES["libris_uri"], person_uri)
+                if qid:
+                    contributor["qid"] = qid
+        return contributors_dict
+
+    def get_q_from_hub(self, prop, value):
+        url = self.HUB_API.format(prop, value)
+        content = json.loads(requests.get(url).text)
+        if content.get("origin"):
+            return content["origin"]["qid"]
+        return False
+
     def extract_contributors(self):
         contributors = []
         valid_roles = ["author", "illustrator", "translator", "editor"]
@@ -125,6 +147,7 @@ class LibrisObject:
                             person = self.format_name(agent)
                         contributors.append(
                             {"role": person_role, "person": person})
+        contributors = self.wikidatafy_contributors(contributors)
         return contributors
 
     def extract_title(self):
