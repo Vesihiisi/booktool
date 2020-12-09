@@ -55,6 +55,7 @@ class LibrisObject:
         clean["libris_uri"] = self.uri
         clean["language"] = self.extract_language()
         clean["title"] = self.extract_title()
+        clean["subtitle"] = self.extract_subtitle()
         clean["publication"] = self.extract_publication()
         clean["contributors"] = self.extract_contributors()
         clean["isbn"] = self.extract_isbn()
@@ -128,12 +129,15 @@ class LibrisObject:
 
     def extract_title(self):
         raw = self.librisxl_data[1]
-        has_subtitle = [x.get("subtitle") for x in raw.get(
-            "hasTitle") if x.get("@type") == "Title"]
         has_main_title = [x.get("mainTitle") for x in raw.get(
             "hasTitle") if x.get("@type") == "Title"]
-        return {"mainTitle": self.delistify(has_main_title),
-                "subtitle": self.delistify(has_subtitle)}
+        return self.delistify(has_main_title)
+
+    def extract_subtitle(self):
+        raw = self.librisxl_data[1]
+        has_subtitle = [x.get("subtitle") for x in raw.get(
+            "hasTitle") if x.get("@type") == "Title"]
+        return self.delistify(has_subtitle)
 
     def extract_language(self):
         raw = self.librisxl_data[1]
